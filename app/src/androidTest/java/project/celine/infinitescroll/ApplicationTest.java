@@ -1,4 +1,4 @@
-package infinitescroll.celine.infinitscroll;
+package project.celine.infinitescroll;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

@@ -1,4 +1,4 @@
-package infinitescroll.celine.infinitscroll;
+package project.celine.infinitescroll;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;

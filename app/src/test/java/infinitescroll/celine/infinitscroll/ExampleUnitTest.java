@@ -1,4 +1,4 @@
-package infinitescroll.celine.infinitscroll;
+package project.celine.infinitescroll;
 
 import org.junit.Test;
 
