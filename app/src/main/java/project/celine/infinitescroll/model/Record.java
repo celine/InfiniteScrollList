@@ -30,6 +30,7 @@ public class Record {
     String amount;
     @Column(name="currency")
     String currency;
-
+    @Column (name="id",unique = true)
+    Integer id;
 
 }
