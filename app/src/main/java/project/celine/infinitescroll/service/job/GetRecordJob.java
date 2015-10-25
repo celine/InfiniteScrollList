@@ -9,6 +9,7 @@ import java.util.List;
 
 import de.greenrobot.event.EventBus;
 import project.celine.infinitescroll.MyApplication;
+import project.celine.infinitescroll.data.Record;
 import project.celine.infinitescroll.data.RecordEvent;
 import project.celine.infinitescroll.model.RecordEntity;
 import project.celine.infinitescroll.model.db.RecordModel;
@@ -20,27 +21,37 @@ import project.celine.infinitescroll.service.HookApiClient;
 public class GetRecordJob extends Job {
     int start;
     int num;
+    boolean cancelJob;
+    RecordModel recordModel;
     public GetRecordJob(int start,int num) {
         super(new Params(1).requireNetwork());
         this.start = start;
         this.num = num;
+        cancelJob = false;
     }
 
     @Override
     public void onAdded() {
-
+        Context context = MyApplication.getInstance();
+        recordModel = new RecordModel(context);
+        List<RecordEntity> recordEntityList = recordModel.getRecordEntities(start, start + num);
+        if(recordEntityList != null && recordEntityList.size() == num){
+            cancelJob = true;
+            EventBus.getDefault().post(new RecordEvent(recordEntityList));
+        }
     }
 
     @Override
     public void onRun() throws Throwable {
-        Context context = MyApplication.getInstance();
-        RecordModel recordModel = new RecordModel(context);
-        List<RecordEntity> recordEntityList = recordModel.getRecordEntities(start, start + num);
-        if(recordEntityList != null && recordEntityList.size() == num){
-            EventBus.getDefault().post(new RecordEvent(recordEntityList));
+        if(cancelJob){
+            return;
         }
         HookApiClient.HookApiService service = HookApiClient.createService();
-        service.listRecords(start,num);
+        List<Record>recordList=service.listRecords(start, num);
+        List<RecordEntity> recordEntityList = recordModel.saveRecordList(recordList);
+        EventBus.getDefault().post(new RecordEvent(recordEntityList));
+        //not keep instance
+        recordModel = null;
     }
 
     @Override

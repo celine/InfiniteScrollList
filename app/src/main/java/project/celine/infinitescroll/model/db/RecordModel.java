@@ -22,12 +22,13 @@ public class RecordModel {
         DaoSession daoSession = dbHelper.getDaoSession();
          recordEntityDao = daoSession.getRecordEntityDao();
     }
-    public  void saveRecordList(List<Record> recordList){
+    public  List<RecordEntity> saveRecordList(List<Record> recordList){
         List<RecordEntity>recordEntities = new ArrayList<>();
         for(Record record:recordList){
             recordEntities.add(record.toEntity());
         }
         recordEntityDao.insertOrReplaceInTx(recordEntities);
+        return recordEntities;
     }
 
     public List<RecordEntity>getRecordEntities(long from, long to){
