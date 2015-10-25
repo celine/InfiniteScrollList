@@ -46,7 +46,7 @@ public class RecordEntityDao extends AbstractDao<RecordEntity, Long> {
     public static void createTable(SQLiteDatabase db, boolean ifNotExists) {
         String constraint = ifNotExists? "IF NOT EXISTS ": "";
         db.execSQL("CREATE TABLE " + constraint + "\"RECORD_ENTITY\" (" + //
-                "\"_id\" INTEGER PRIMARY KEY ," + // 0: id
+                "\"_id\" INTEGER PRIMARY KEY AUTOINCREMENT ," + // 0: id
                 "\"RECORD_ID\" INTEGER," + // 1: recordId
                 "\"NOTE\" TEXT," + // 2: note
                 "\"CURRENCY\" TEXT," + // 3: currency

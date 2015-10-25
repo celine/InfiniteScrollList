@@ -31,7 +31,7 @@ public class RecordModel {
     }
 
     public List<RecordEntity>getRecordEntities(long from, long to){
-        Query<RecordEntity> query=  recordEntityDao.queryBuilder().where(RecordEntityDao.Properties.RecordId.ge(from),RecordEntityDao.Properties.RecordId.le(to)).build();
+        Query<RecordEntity> query=  recordEntityDao.queryBuilder().where(RecordEntityDao.Properties.RecordId.ge(from),RecordEntityDao.Properties.RecordId.lt(to)).build();
         return query.list();
     }
 }

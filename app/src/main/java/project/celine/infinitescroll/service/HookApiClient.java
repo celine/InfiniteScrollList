@@ -19,6 +19,6 @@ public static HookApiService createService(){
 }
     public interface HookApiService {
         @GET("/infinite-list")
-        List<Record> listRepos(@Query("startIndex") int startIndex,@Query("num")int num);
+        List<Record> listRecords(@Query("startIndex") int startIndex, @Query("num") int num);
     }
 }
