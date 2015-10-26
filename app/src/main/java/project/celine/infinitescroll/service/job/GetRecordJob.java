@@ -19,11 +19,11 @@ import project.celine.infinitescroll.service.HookApiClient;
  * Created by celine on 2015/10/25.
  */
 public class GetRecordJob extends Job {
-    int start;
+    long start;
     int num;
     boolean cancelJob;
     RecordModel recordModel;
-    public GetRecordJob(int start,int num) {
+    public GetRecordJob(long start,int num) {
         super(new Params(1).requireNetwork());
         this.start = start;
         this.num = num;
@@ -37,7 +37,7 @@ public class GetRecordJob extends Job {
         List<RecordEntity> recordEntityList = recordModel.getRecordEntities(start, start + num);
         if(recordEntityList != null && recordEntityList.size() == num){
             cancelJob = true;
-            EventBus.getDefault().post(new RecordEvent(recordEntityList));
+            EventBus.getDefault().post(new RecordEvent(start, recordEntityList));
         }
     }
 
@@ -49,7 +49,7 @@ public class GetRecordJob extends Job {
         HookApiClient.HookApiService service = HookApiClient.createService();
         List<Record>recordList=service.listRecords(start, num);
         List<RecordEntity> recordEntityList = recordModel.saveRecordList(recordList);
-        EventBus.getDefault().post(new RecordEvent(recordEntityList));
+        EventBus.getDefault().post(new RecordEvent(start,recordEntityList));
         //not keep instance
         recordModel = null;
     }
