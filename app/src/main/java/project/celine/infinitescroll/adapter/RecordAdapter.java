@@ -3,6 +3,7 @@ package project.celine.infinitescroll.adapter;
 import android.content.res.Resources;
 import android.support.v4.util.LruCache;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -18,10 +19,12 @@ import project.celine.infinitescroll.model.RecordEntity;
  * Created by celine on 2015/10/26.
  */
 public class RecordAdapter extends RecyclerView.Adapter<RecordViewHolder> implements Constants {
-    LruCache<Long, List<RecordEntity>> recordsCache;
+    private static final String LOG_TAG = RecordAdapter.class.getSimpleName();
+    LruCache<Integer, List<RecordEntity>> recordsCache;
     Resources mResources;
     private int mCount;
-    public RecordAdapter(Resources res, LruCache<Long, List<RecordEntity>> recordsCache) {
+
+    public RecordAdapter(Resources res, LruCache<Integer, List<RecordEntity>> recordsCache) {
         this.recordsCache = recordsCache;
         mResources = res;
     }
@@ -33,7 +36,7 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordViewHolder> implem
 
     @Override
     public void onBindViewHolder(RecordViewHolder holder, int position) {
-        long offset = position / FETCH_RECORD_NUM;
+        int offset = position / FETCH_RECORD_NUM;
         int mod = position % FETCH_RECORD_NUM;
         List<RecordEntity> recordEntities = recordsCache.get(offset);
         if (recordEntities != null) {
@@ -57,12 +60,15 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordViewHolder> implem
         }
 
     }
-    public void updateData(int count){
+
+    public void updateData(int count) {
         mCount = count;
         notifyDataSetChanged();
     }
+
     @Override
     public int getItemCount() {
+        Log.d(LOG_TAG, "getItemCount " + mCount);
         return mCount;
     }
 }

@@ -1,6 +1,7 @@
 package project.celine.infinitescroll.service.job;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.path.android.jobqueue.Job;
 import com.path.android.jobqueue.Params;
@@ -19,11 +20,13 @@ import project.celine.infinitescroll.service.HookApiClient;
  * Created by celine on 2015/10/25.
  */
 public class GetRecordJob extends Job {
-    long start;
+    private static final String LOG_TAG = GetRecordJob.class.getSimpleName();
+    int start;
     int num;
     boolean cancelJob;
     RecordModel recordModel;
-    public GetRecordJob(long start,int num) {
+
+    public GetRecordJob(int start, int num) {
         super(new Params(1).requireNetwork());
         this.start = start;
         this.num = num;
@@ -32,10 +35,12 @@ public class GetRecordJob extends Job {
 
     @Override
     public void onAdded() {
+        Log.d(LOG_TAG, "onAdded");
         Context context = MyApplication.getInstance();
         recordModel = new RecordModel(context);
+        Log.d(LOG_TAG, "Get start " + start + " to " + (start + num));
         List<RecordEntity> recordEntityList = recordModel.getRecordEntities(start, start + num);
-        if(recordEntityList != null && recordEntityList.size() == num){
+        if (recordEntityList != null && recordEntityList.size() == num) {
             cancelJob = true;
             EventBus.getDefault().post(new RecordEvent(start, recordEntityList));
         }
@@ -43,15 +48,21 @@ public class GetRecordJob extends Job {
 
     @Override
     public void onRun() throws Throwable {
-        if(cancelJob){
+        if (cancelJob) {
             return;
         }
-        HookApiClient.HookApiService service = HookApiClient.createService();
-        List<Record>recordList=service.listRecords(start, num);
-        List<RecordEntity> recordEntityList = recordModel.saveRecordList(recordList);
-        EventBus.getDefault().post(new RecordEvent(start,recordEntityList));
-        //not keep instance
-        recordModel = null;
+        try {
+            HookApiClient.HookApiService service = HookApiClient.createService();
+            Log.d(LOG_TAG, "listRecord");
+            List<Record> recordList = service.listRecords(start, num);
+            List<RecordEntity> recordEntityList = recordModel.saveRecordList(recordList);
+            Log.d(LOG_TAG, "fetch record size " + recordEntityList.size());
+            EventBus.getDefault().post(new RecordEvent(start, recordEntityList));
+            //not keep instance
+            recordModel = null;
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Error", e);
+        }
     }
 
     @Override
