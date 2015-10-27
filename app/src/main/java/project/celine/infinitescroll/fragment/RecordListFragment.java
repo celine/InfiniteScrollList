@@ -128,6 +128,7 @@ public class RecordListFragment extends Fragment implements Constants {
     public void onEventMainThread(RecordEvent recordEvent) {
         int offset = recordEvent.getStart() / FETCH_RECORD_NUM;
         recordsCache.put(offset, recordEvent.getRecordEntities());
+        Log.d(LOG_TAG,"cache size " + recordsCache.size());
         int currentCount = mAdapter.getItemCount();
         int newCount = (offset + 1) * FETCH_RECORD_NUM;
         Log.d(LOG_TAG, "newCount " + newCount);
