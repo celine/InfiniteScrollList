@@ -26,8 +26,8 @@ public class GetRecordJob extends Job {
     boolean cancelJob;
     RecordModel recordModel;
 
-    public GetRecordJob(int start, int num) {
-        super(new Params(1).requireNetwork());
+    public GetRecordJob(int start, int num,String jobTagId) {
+        super(new Params(1).addTags(jobTagId).requireNetwork());
         this.start = start;
         this.num = num;
         cancelJob = false;

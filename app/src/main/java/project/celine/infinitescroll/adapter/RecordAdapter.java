@@ -22,7 +22,6 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordViewHolder> implem
     private static final String LOG_TAG = RecordAdapter.class.getSimpleName();
     LruCache<Integer, List<RecordEntity>> recordsCache;
     Resources mResources;
-    private int mCount;
 
     public RecordAdapter(Resources res, LruCache<Integer, List<RecordEntity>> recordsCache) {
         this.recordsCache = recordsCache;
@@ -41,7 +40,7 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordViewHolder> implem
         List<RecordEntity> recordEntities = recordsCache.get(offset);
         if (recordEntities != null) {
             RecordEntity recordEntity = recordEntities.get(mod);
-            holder.getTitle().setText(mResources.getString(R.string.title_format, recordEntity.getSender(),
+            holder.getTitle().setText(recordEntity.getRecordId() + " " + mResources.getString(R.string.title_format, recordEntity.getSender(),
                     recordEntity.getAmount(), recordEntity.getCurrency(), recordEntity.getRecipient()));
             holder.getNote().setText(recordEntity.getNote());
             SimpleDateFormat format = new SimpleDateFormat(DATE_TIME_FORMAT, Locale.getDefault());
@@ -61,14 +60,9 @@ public class RecordAdapter extends RecyclerView.Adapter<RecordViewHolder> implem
 
     }
 
-    public void updateData(int count) {
-        mCount = count;
-        notifyDataSetChanged();
-    }
 
     @Override
     public int getItemCount() {
-        Log.d(LOG_TAG, "getItemCount " + mCount);
-        return mCount;
+        return Integer.MAX_VALUE;
     }
 }

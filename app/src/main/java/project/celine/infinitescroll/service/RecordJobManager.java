@@ -12,8 +12,11 @@ import com.path.android.jobqueue.log.CustomLogger;
  */
 public class RecordJobManager extends JobManager {
     private static final String LOG_TAG = RecordJobManager.class.getSimpleName();
-    public RecordJobManager(Context context) {
-        super(context);
+    protected RecordJobManager(Context context, Configuration configuration) {
+        super(context,configuration);
+
+    }
+    public static RecordJobManager getJobManager(Context context){
         Configuration configuration = new Configuration.Builder(context).customLogger(new CustomLogger() {
             @Override
             public boolean isDebugEnabled() {
@@ -38,5 +41,7 @@ public class RecordJobManager extends JobManager {
 
             }
         }).minConsumerCount(1).maxConsumerCount(8).consumerKeepAlive(120).build();
+        RecordJobManager jobManager = new RecordJobManager(context,configuration);
+        return jobManager;
     }
 }

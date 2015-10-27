@@ -12,6 +12,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.path.android.jobqueue.TagConstraint;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -27,11 +31,15 @@ import project.celine.infinitescroll.service.job.GetRecordJob;
  * Created by celine on 2015/10/26.
  */
 public class RecordListFragment extends Fragment implements Constants {
+    private static final int MAX_JOB_QUEUE = 10;
+    private static final String LOG_TAG = RecordListFragment.class.getSimpleName();
     RecyclerView mRecyclerView;
     LruCache<Integer, List<RecordEntity>> recordsCache;
     RecordAdapter mAdapter;
     LinearLayoutManager mLayoutManager;
-    RecordJobManager recordJobManager ;
+    RecordJobManager recordJobManager;
+    List<String> jobTaskQueue;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -59,7 +67,8 @@ public class RecordListFragment extends Fragment implements Constants {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        recordJobManager= new RecordJobManager(getActivity());
+        jobTaskQueue = new ArrayList<>();
+        recordJobManager = RecordJobManager.getJobManager(getActivity());
         recordsCache = new LruCache<Integer, List<RecordEntity>>(CACHE_SIZE) {
             @Override
             protected int sizeOf(Integer key, List<RecordEntity> value) {
@@ -73,36 +82,59 @@ public class RecordListFragment extends Fragment implements Constants {
         mRecyclerView.addOnScrollListener(new OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                int totalItemCount = mLayoutManager.getItemCount();
+            //    int totalItemCount = mLayoutManager.getItemCount();
                 int firstVisible = mLayoutManager.findFirstVisibleItemPosition();
-                int visibleItemCount = mLayoutManager.getChildCount();
-                if (firstVisible + visibleItemCount + FETCH_RECORD_NUM > totalItemCount) {
-                    mAdapter.updateData(totalItemCount + 2 * FETCH_RECORD_NUM);
-                }
+             //   int visibleItemCount = mLayoutManager.getChildCount();
+
                 int fromOffset = Math.max(0, firstVisible - 2 * FETCH_RECORD_NUM) / FETCH_RECORD_NUM;
                 int toOffset = (firstVisible + 2 * FETCH_RECORD_NUM) / FETCH_RECORD_NUM;
-                for(int offset = fromOffset; offset <= toOffset;offset++){
-                    if(recordsCache.get(offset) == null){
-                        GetRecordJob getRecordJob = new GetRecordJob(offset*FETCH_RECORD_NUM, FETCH_RECORD_NUM);
+                for (int offset = fromOffset; offset <= toOffset; offset++) {
+                    if (recordsCache.get(offset) == null) {
+                        String jobTagId = generateJobTag(offset);
+                        if (jobTaskQueue.contains(jobTagId)) {
+                            continue;
+                        }
+                        GetRecordJob getRecordJob = new GetRecordJob(offset * FETCH_RECORD_NUM, FETCH_RECORD_NUM, jobTagId);
                         recordJobManager.addJob(getRecordJob);
+
+                        jobTaskQueue.add(jobTagId);
                     }
                 }
+                int currentSize = jobTaskQueue.size();
+                if (currentSize > MAX_JOB_QUEUE) {
+
+                    Iterator<String> jobTaskIterator = jobTaskQueue.iterator();
+                    while (jobTaskIterator.hasNext()) {
+                        String jobTagId = jobTaskIterator.next();
+                        recordJobManager.cancelJobs(TagConstraint.ANY, jobTagId);
+                        jobTaskIterator.remove();
+                        currentSize--;
+                        if (currentSize < MAX_JOB_QUEUE) {
+                            break;
+                        }
+                    }
+                }
+
             }
         });
-        GetRecordJob getRecordJob = new GetRecordJob(0, FETCH_RECORD_NUM);
+        GetRecordJob getRecordJob = new GetRecordJob(0, FETCH_RECORD_NUM, generateJobTag(0));
         recordJobManager.addJob(getRecordJob);
     }
-    private static final String LOG_TAG = RecordListFragment.class.getSimpleName();
-     public void onEventMainThread(RecordEvent recordEvent) {
+
+    public String generateJobTag(int offset) {
+        return "jobTag#" + offset;
+    }
+
+    public void onEventMainThread(RecordEvent recordEvent) {
         int offset = recordEvent.getStart() / FETCH_RECORD_NUM;
         recordsCache.put(offset, recordEvent.getRecordEntities());
         int currentCount = mAdapter.getItemCount();
-        int newCount =  (offset+1)*FETCH_RECORD_NUM;
+        int newCount = (offset + 1) * FETCH_RECORD_NUM;
         Log.d(LOG_TAG, "newCount " + newCount);
-        if(currentCount < newCount){
-            mAdapter.updateData(newCount);
-        }else {
-            mAdapter.notifyDataSetChanged();
+        mAdapter.notifyDataSetChanged();
+        String jobTagId = generateJobTag(offset);
+        if (jobTaskQueue.contains(jobTagId)) {
+            jobTaskQueue.remove(jobTagId);
         }
     }
 
