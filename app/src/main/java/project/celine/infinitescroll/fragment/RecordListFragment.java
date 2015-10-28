@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.path.android.jobqueue.CancelResult;
 import com.path.android.jobqueue.TagConstraint;
 
 import java.util.ArrayList;
@@ -106,7 +107,12 @@ public class RecordListFragment extends Fragment implements Constants {
                     Iterator<String> jobTaskIterator = jobTaskQueue.iterator();
                     while (jobTaskIterator.hasNext()) {
                         String jobTagId = jobTaskIterator.next();
-                        recordJobManager.cancelJobs(TagConstraint.ANY, jobTagId);
+                        recordJobManager.cancelJobsInBackground(new CancelResult.AsyncCancelCallback(){
+                            @Override
+                            public void onCancelled(CancelResult cancelResult) {
+
+                            }
+                        }, TagConstraint.ANY, jobTagId);
                         jobTaskIterator.remove();
                         currentSize--;
                         if (currentSize < MAX_JOB_QUEUE) {
