@@ -126,8 +126,11 @@ public class RecordListFragment extends Fragment implements Constants {
 
             }
         });
-        GetRecordJob getRecordJob = new GetRecordJob(0, FETCH_RECORD_NUM, generateJobTag(0));
+        errorDisplay = false;
+        String firstTag = generateJobTag(0);
+        GetRecordJob getRecordJob = new GetRecordJob(0, FETCH_RECORD_NUM, firstTag);
         recordJobManager.addJob(getRecordJob);
+        jobTaskQueue.add(firstTag);
     }
 
     public String generateJobTag(int offset) {
@@ -147,6 +150,7 @@ public class RecordListFragment extends Fragment implements Constants {
             jobTaskQueue.remove(jobTagId);
         }
     }
+    boolean errorDisplay;
     public void onEventMainThread(ErrorEvent errorEvent){
         Log.d(LOG_TAG,"GetRecord result error");
         String message = "";
@@ -162,6 +166,10 @@ public class RecordListFragment extends Fragment implements Constants {
                 message = activity.getString(R.string.unknown_error);
 
         }
+        if(errorDisplay){
+            return;
+        }
+        errorDisplay = true;
         Toast.makeText(activity, message,Toast.LENGTH_SHORT).show();
     }
 
