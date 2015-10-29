@@ -30,7 +30,7 @@ public class RecordDaoGenerator extends DaoGenerator {
     private static void addRecord(Schema schema){
         Entity entity = schema.addEntity("RecordEntity");
         entity.addIdProperty().autoincrement();
-        entity.addLongProperty("recordId");
+        entity.addLongProperty("recordId").unique();
         entity.addStringProperty("note");
         entity.addStringProperty("currency");
         entity.addStringProperty("sender");

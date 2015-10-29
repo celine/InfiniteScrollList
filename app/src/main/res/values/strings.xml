@@ -3,4 +3,6 @@
     <string name="action_settings">Settings</string>
     <string name="loading">Loading...</string>
     <string name="title_format">%1$s send %2$d %3$s to %4$s</string>
+    <string name="server_error">Unknown error from server</string>
+    <string name="unknown_error">Unknown error</string>
 </resources>

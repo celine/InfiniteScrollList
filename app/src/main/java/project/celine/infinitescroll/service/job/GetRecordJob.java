@@ -3,6 +3,7 @@ package project.celine.infinitescroll.service.job;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.gson.JsonSyntaxException;
 import com.path.android.jobqueue.Job;
 import com.path.android.jobqueue.Params;
 
@@ -10,11 +11,13 @@ import java.util.List;
 
 import de.greenrobot.event.EventBus;
 import project.celine.infinitescroll.MyApplication;
+import project.celine.infinitescroll.data.ErrorEvent;
 import project.celine.infinitescroll.data.Record;
 import project.celine.infinitescroll.data.RecordEvent;
 import project.celine.infinitescroll.model.RecordEntity;
 import project.celine.infinitescroll.model.db.RecordModel;
 import project.celine.infinitescroll.service.HookApiClient;
+import retrofit.RetrofitError;
 
 /**
  * Created by celine on 2015/10/25.
@@ -36,13 +39,22 @@ public class GetRecordJob extends Job {
     @Override
     public void onAdded() {
         Log.d(LOG_TAG, "onAdded");
-        Context context = MyApplication.getInstance();
-        recordModel = new RecordModel(context);
-        Log.d(LOG_TAG, "Get start " + start + " to " + (start + num));
-        List<RecordEntity> recordEntityList = recordModel.getRecordEntities(start, start + num);
-        if (recordEntityList != null && recordEntityList.size() == num) {
-            cancelJob = true;
-            EventBus.getDefault().post(new RecordEvent(start, recordEntityList));
+        try {
+            Context context = MyApplication.getInstance();
+            recordModel = new RecordModel(context);
+            Log.d(LOG_TAG, "Get start " + start + " to " + (start + num));
+            List<RecordEntity> recordEntityList = recordModel.getRecordEntities(start, start + num);
+            if(recordEntityList != null){
+                Log.d(LOG_TAG,"get record " + recordEntityList.size());
+            }
+            if (recordEntityList != null && recordEntityList.size() == num) {
+                cancelJob = true;
+                EventBus.getDefault().post(new RecordEvent(start, recordEntityList));
+            }
+        }catch(Exception e){
+            Log.e(LOG_TAG,"e " + e);
+           // Log.e(LOG_TAG,"error",e);
+            EventBus.getDefault().post(new ErrorEvent(ErrorEvent.SERVER_ERROR));
         }
     }
 
@@ -61,7 +73,8 @@ public class GetRecordJob extends Job {
             //not keep instance
             recordModel = null;
         } catch (Exception e) {
-            Log.e(LOG_TAG, "Error", e);
+            Log.e(LOG_TAG, "Error "+ e);
+            EventBus.getDefault().post(new ErrorEvent(ErrorEvent.SERVER_ERROR));
         }
     }
 

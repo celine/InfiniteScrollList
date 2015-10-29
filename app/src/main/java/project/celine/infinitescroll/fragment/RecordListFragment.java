@@ -1,5 +1,6 @@
 package project.celine.infinitescroll.fragment;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.path.android.jobqueue.CancelResult;
 import com.path.android.jobqueue.TagConstraint;
@@ -23,6 +25,7 @@ import de.greenrobot.event.EventBus;
 import project.celine.infinitescroll.Constants;
 import project.celine.infinitescroll.R;
 import project.celine.infinitescroll.adapter.RecordAdapter;
+import project.celine.infinitescroll.data.ErrorEvent;
 import project.celine.infinitescroll.data.RecordEvent;
 import project.celine.infinitescroll.model.RecordEntity;
 import project.celine.infinitescroll.service.RecordJobManager;
@@ -83,9 +86,9 @@ public class RecordListFragment extends Fragment implements Constants {
         mRecyclerView.addOnScrollListener(new OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            //    int totalItemCount = mLayoutManager.getItemCount();
+                //    int totalItemCount = mLayoutManager.getItemCount();
                 int firstVisible = mLayoutManager.findFirstVisibleItemPosition();
-             //   int visibleItemCount = mLayoutManager.getChildCount();
+                //   int visibleItemCount = mLayoutManager.getChildCount();
 
                 int fromOffset = Math.max(0, firstVisible - 2 * FETCH_RECORD_NUM) / FETCH_RECORD_NUM;
                 int toOffset = (firstVisible + 2 * FETCH_RECORD_NUM) / FETCH_RECORD_NUM;
@@ -107,7 +110,7 @@ public class RecordListFragment extends Fragment implements Constants {
                     Iterator<String> jobTaskIterator = jobTaskQueue.iterator();
                     while (jobTaskIterator.hasNext()) {
                         String jobTagId = jobTaskIterator.next();
-                        recordJobManager.cancelJobsInBackground(new CancelResult.AsyncCancelCallback(){
+                        recordJobManager.cancelJobsInBackground(new CancelResult.AsyncCancelCallback() {
                             @Override
                             public void onCancelled(CancelResult cancelResult) {
 
@@ -143,6 +146,23 @@ public class RecordListFragment extends Fragment implements Constants {
         if (jobTaskQueue.contains(jobTagId)) {
             jobTaskQueue.remove(jobTagId);
         }
+    }
+    public void onEventMainThread(ErrorEvent errorEvent){
+        Log.d(LOG_TAG,"GetRecord result error");
+        String message = "";
+        Activity activity = getActivity();
+        if(activity == null){
+            return;
+        }
+        switch (errorEvent.getError()){
+            case ErrorEvent.SERVER_ERROR:
+                message = activity.getString(R.string.server_error);
+                break;
+            default:
+                message = activity.getString(R.string.unknown_error);
+
+        }
+        Toast.makeText(activity, message,Toast.LENGTH_SHORT).show();
     }
 
 }
