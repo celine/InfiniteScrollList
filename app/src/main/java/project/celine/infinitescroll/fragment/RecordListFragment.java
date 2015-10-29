@@ -127,10 +127,6 @@ public class RecordListFragment extends Fragment implements Constants {
             }
         });
         errorDisplay = false;
-        String firstTag = generateJobTag(0);
-        GetRecordJob getRecordJob = new GetRecordJob(0, FETCH_RECORD_NUM, firstTag);
-        recordJobManager.addJob(getRecordJob);
-        jobTaskQueue.add(firstTag);
     }
 
     public String generateJobTag(int offset) {
@@ -141,9 +137,6 @@ public class RecordListFragment extends Fragment implements Constants {
         int offset = recordEvent.getStart() / FETCH_RECORD_NUM;
         recordsCache.put(offset, recordEvent.getRecordEntities());
         Log.d(LOG_TAG,"cache size " + recordsCache.size());
-        int currentCount = mAdapter.getItemCount();
-        int newCount = (offset + 1) * FETCH_RECORD_NUM;
-        Log.d(LOG_TAG, "newCount " + newCount);
         mAdapter.notifyDataSetChanged();
         String jobTagId = generateJobTag(offset);
         if (jobTaskQueue.contains(jobTagId)) {
