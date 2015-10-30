@@ -8,17 +8,18 @@ import com.activeandroid.ActiveAndroid;
  * Created by celine on 2015/10/24.
  */
 public class MyApplication extends Application {
-   static MyApplication instance;
-    public MyApplication(){
-        instance = this;
+    private static final String LOG_TAG = MyApplication.class.getSimpleName();
+    static MyApplication instance;
+
+    public static MyApplication getInstance() {
+        return instance;
     }
+
     @Override
     public void onCreate() {
         super.onCreate();
+        instance = this;
         ActiveAndroid.initialize(this);
-    }
-    public static MyApplication getInstance(){
-        return instance;
     }
 
 }
