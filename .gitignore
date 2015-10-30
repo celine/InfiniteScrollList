@@ -1,6 +1,7 @@
 .gradle
 /local.properties
 .idea
+/.idea/*
 /.idea/workspace.xml
 /.idea/libraries
 .DS_Store
@@ -8,3 +9,4 @@
 /captures
 gradlew
 gradlew.bat
+.iml
